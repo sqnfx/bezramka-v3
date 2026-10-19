@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Ten sam rozmiar co Stacja Ciuchciowo, więc przy przemianie okno się nie zmienia. -->
+<meta name="bezramka-rozmiar" content="1200x680">
+<title>Gdzie słońce świeci?</title>
+<link rel="stylesheet" href="slonce.css">
+</head>
+<body>
+<main id="scena" data-bezramka-uchwyt aria-label="Słońce z radarem: gdzie najbliżej świeci teraz słońce">
+
+  <svg id="slonce" viewBox="0 0 1200 680" aria-hidden="true">
+    <defs>
+      <radialGradient id="g-tarcza" cx="600" cy="250" r="260" gradientUnits="userSpaceOnUse">
+        <stop offset="0" stop-color="#FFE48A"/>
+        <stop offset=".7" stop-color="#FFC53D"/>
+        <stop offset="1" stop-color="#F7A21B"/>
+      </radialGradient>
+      <linearGradient id="g-promien" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#FFB524"/>
+        <stop offset="1" stop-color="#FF9414"/>
+      </linearGradient>
+      <linearGradient id="g-wstega" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#2A72C2"/>
+        <stop offset="1" stop-color="#1D5BA3"/>
+      </linearGradient>
+      <path id="luk-napisu" d="M 401 296 A 199 199 0 0 1 799 296"/>
+    </defs>
+
+    <g id="promienie"></g>
+    <circle cx="600" cy="296" r="222" fill="url(#g-tarcza)"/>
+    <circle cx="600" cy="296" r="194" fill="none" stroke="#E8901A" stroke-width="2" opacity=".6"/>
+    <text class="napis"><textPath href="#luk-napisu" startOffset="50%" text-anchor="middle">Gdzie słońce świeci?</textPath></text>
+
+    <!-- wstęga z odpowiedzią -->
+    <g id="wstega-rysunek">
+      <path d="M150 510 L 62 510 L 92 565 L 62 620 L 168 620 L 168 600 Z" fill="#174A86"/>
+      <path d="M1050 510 L 1138 510 L 1108 565 L 1138 620 L 1032 620 L 1032 600 Z" fill="#174A86"/>
+      <path d="M150 600 L 168 620 L 168 600 Z" fill="#0E3360"/>
+      <path d="M1050 600 L 1032 620 L 1032 600 Z" fill="#0E3360"/>
+      <rect x="150" y="486" width="900" height="114" rx="8" fill="url(#g-wstega)"/>
+      <rect x="150" y="486" width="900" height="3" rx="1.5" fill="#5C9BE0" opacity=".7"/>
+    </g>
+  </svg>
+
+  <canvas id="radar" role="img" aria-label="Radar słońca: Ty w środku, słoneczne miejscowości na żółto, pochmurne na szaro, noc na granatowo"></canvas>
+  <div id="dymek-radaru" class="dymek-radaru" hidden></div>
+
+  <canvas id="para" aria-hidden="true"></canvas>
+
+  <section id="wstega" data-bezramka-bez-uchwytu aria-label="Odpowiedź">
+    <div id="widok-odpowiedz">
+      <p id="odpowiedz" class="odpowiedz" aria-live="polite">Ustalam, gdzie jesteś…</p>
+      <p class="szczegoly"><span id="szczegoly">Na podstawie adresu internetowego.</span>
+        <a href="https://open-meteo.com/" id="zrodlo" class="zrodlo" title="Pogoda: Open-Meteo.com (CC BY 4.0). Miejscowości: GeoNames (CC BY 4.0). Kontury lądów: Natural Earth.">Dane: Open-Meteo.com, GeoNames</a></p>
+    </div>
+    <form id="widok-miejsce" class="widok-miejsce" hidden autocomplete="off">
+      <input id="miejsce-pole" type="search" spellcheck="false" placeholder="Wpisz swoją miejscowość, np. Kalisz" aria-label="Twoja miejscowość"
+             aria-autocomplete="list" aria-controls="podpowiedzi">
+      <button type="button" id="miejsce-ip" class="przycisk-jasny">Ustal z adresu internetowego</button>
+      <button type="button" id="miejsce-anuluj" class="przycisk-jasny">Anuluj</button>
+      <ul id="podpowiedzi" class="podpowiedzi" role="listbox" hidden></ul>
+    </form>
+    <div class="przyciski">
+      <button type="button" id="szukaj" class="przycisk-glowny">Szukaj ponownie</button>
+      <button type="button" id="zmien" class="przycisk-jasny">Twoje miejsce: <b id="moje-miejsce">…</b></button>
+      <button type="button" id="mapa" class="przycisk-jasny" hidden>Pokaż na mapie</button>
+      <button type="button" id="wroc" class="przycisk-jasny wroc">Wróć do ciuchci</button>
+    </div>
+  </section>
+</main>
+
+<p id="poza">Ta strona ma przezroczyste tło. Otwórz ją w Bezramce, a z okna zostanie samo słońce.</p>
+
+<script src="miejscowosci.js"></script>
+<script src="kontury.js"></script>
+<script src="slonce.js"></script>
+</body>
+</html>

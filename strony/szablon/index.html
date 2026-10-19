@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 1. Rozmiar okna w Bezramce (szerokość x wysokość). Bez tego okno ma 1100 x 720. -->
+<meta name="bezramka-rozmiar" content="380x380">
+<title>Szablon kształtu</title>
+<style>
+  /* 2. Tło strony musi być przezroczyste. Wtedy z okna zostaje tylko to, co narysujesz. */
+  html, body { margin: 0; height: 100%; overflow: hidden; background: transparent; }
+
+  body {
+    display: grid;
+    place-items: center;
+    font-family: "Segoe UI", "Helvetica Neue", "Noto Sans", "DejaVu Sans", Arial, sans-serif;
+  }
+
+  /* 3. Kształt robisz zwykłym CSS-em: border-radius, clip-path, SVG albo PNG z przezroczystością.
+        Kliknięcia w przezroczyste miejsca przechodzą do okien pod spodem. */
+  .kolko {
+    width: 94vmin;
+    height: 94vmin;
+    border-radius: 50%;
+    display: grid;
+    place-content: center;
+    gap: 3vmin;
+    padding: 12vmin;
+    box-sizing: border-box;
+    text-align: center;
+    background: radial-gradient(circle at 34% 28%, #FFE7A3, #F2B33D 58%, #C47A10);
+    color: #3A2400;
+  }
+  h1 { margin: 0; font-size: 7vmin; line-height: 1.1; }
+  p { margin: 0; font-size: 4vmin; line-height: 1.35; }
+
+  button {
+    justify-self: center;
+    padding: 2.4vmin 4.8vmin;
+    border: 0;
+    border-radius: 99px;
+    background: #3A2400;
+    color: #FFE7A3;
+    font-family: inherit;
+    font-size: 4.2vmin;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  button:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+</style>
+</head>
+<body>
+  <!-- 4. Atrybut data-bezramka-uchwyt: za ten element można przeciągać całe okno. -->
+  <main class="kolko" data-bezramka-uchwyt>
+    <h1>Tu będzie Twoja strona</h1>
+    <p>Zmień ten plik: strony/szablon/index.html</p>
+    <button type="button" id="licznik">Kliknięto 0 razy</button>
+    <p>Przeciągnij kółko, żeby je przesunąć.</p>
+  </main>
+<script>
+  let ile = 0;
+  document.getElementById('licznik').addEventListener('click', (e) => {
+    ile += 1;
+    e.currentTarget.textContent = `Kliknięto ${ile} ${ile === 1 ? 'raz' : 'razy'}`;
+  });
+</script>
+</body>
+</html>

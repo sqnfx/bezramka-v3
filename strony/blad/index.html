@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="bezramka-rozmiar" content="640x440">
+<title>Nie dojedziemy tam</title>
+<!-- Strona błędu Bezramki. Celowo jeden plik: działa też pod adresem, którego nie ma. -->
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: transparent; }
+  body { font-family: "Segoe UI", "Helvetica Neue", "Noto Sans", "DejaVu Sans", Arial, sans-serif; }
+  html:not(.w-bezramce) body { background: linear-gradient(#BCD3DE, #E3ECEC 62%, #C9CDB8); }
+
+  #scena { position: absolute; left: 0; top: 0; width: 640px; height: 440px; transform-origin: 0 0; }
+  svg { position: absolute; left: 0; top: 0; width: 640px; height: 440px; pointer-events: none; }
+  svg * { pointer-events: visiblePainted; }
+
+  .tablica {
+    position: absolute;
+    left: 40px; top: 16px;
+    width: 560px; height: 238px;
+    box-sizing: border-box;
+    padding: 22px 28px 20px;
+    display: flex;
+    flex-direction: column;
+    background: #0D3B82;
+    border: 4px solid #F2F4F8;
+    border-radius: 12px;
+    box-shadow: 0 0 0 2px #072556;
+    color: #FFFFFF;
+  }
+  h1 { margin: 0; font-size: 26px; font-weight: 650; line-height: 1.15; }
+  .opis { margin: 8px 0 0; max-width: 46ch; font-size: 15px; line-height: 1.45; color: #D7E3F8; }
+  .adres {
+    margin: 12px 0 0;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -webkit-user-select: text;
+    user-select: text;
+  }
+  .adres span { color: #AFC4EA; }
+  .przyciski { margin-top: auto; display: flex; gap: 10px; }
+  .przyciski a {
+    display: inline-flex;
+    align-items: center;
+    height: 38px;
+    padding: 0 16px;
+    border: 2px solid #FFFFFF;
+    border-radius: 8px;
+    font-size: 14.5px;
+    font-weight: 600;
+    text-decoration: none;
+    color: #FFFFFF;
+  }
+  .przyciski a.glowny { background: #FFFFFF; color: #0D3B82; }
+  .przyciski a:hover { background: rgba(255, 255, 255, .14); }
+  .przyciski a.glowny:hover { background: #E4ECFA; }
+  .przyciski a:focus-visible { outline: 3px solid #FFD23F; outline-offset: 2px; }
+</style>
+</head>
+<body>
+<main id="scena" aria-labelledby="tytul">
+  <svg viewBox="0 0 640 440" aria-hidden="true" data-bezramka-uchwyt>
+    <defs>
+      <pattern id="pasy" width="26" height="26" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+        <rect width="13" height="26" fill="#D3271D"/>
+        <rect x="13" width="13" height="26" fill="#F4F4F2"/>
+      </pattern>
+    </defs>
+    <!-- słupki tablicy -->
+    <rect x="170" y="250" width="12" height="56" fill="#7B828A"/>
+    <rect x="458" y="250" width="12" height="56" fill="#7B828A"/>
+    <!-- kozioł oporowy na końcu toru -->
+    <path d="M190 336 L168 398 H188 L212 336 Z" fill="#2B2E33"/>
+    <path d="M450 336 L472 398 H452 L428 336 Z" fill="#2B2E33"/>
+    <rect x="130" y="300" width="380" height="40" rx="4" fill="url(#pasy)" stroke="#2B2E33" stroke-width="3"/>
+    <circle cx="200" cy="320" r="25" fill="#3E4349"/>
+    <circle cx="200" cy="320" r="15" fill="#8A9097"/>
+    <circle cx="440" cy="320" r="25" fill="#3E4349"/>
+    <circle cx="440" cy="320" r="15" fill="#8A9097"/>
+    <!-- tor -->
+    <rect x="96" y="404" width="448" height="18" rx="3" fill="#5E4330"/>
+    <rect x="160" y="394" width="36" height="12" fill="#8A9097"/>
+    <rect x="444" y="394" width="36" height="12" fill="#8A9097"/>
+  </svg>
+
+  <section class="tablica">
+    <h1 id="tytul">Nie udało się otworzyć strony</h1>
+    <p class="opis" id="opis">Sprawdź adres i spróbuj jeszcze raz.</p>
+    <p class="adres" id="adres" hidden><span>Adres:</span> <b id="adres-tekst"></b></p>
+    <div class="przyciski">
+      <a class="glowny" id="ponownie" href="#" hidden>Spróbuj ponownie</a>
+      <a id="dom" href="bezramka://stacja/">Wróć na stację</a>
+    </div>
+  </section>
+</main>
+
+<script>
+  'use strict';
+  (() => {
+    document.documentElement.classList.toggle('w-bezramce', typeof window.bezramka === 'object' && window.bezramka !== null);
+
+    const p = new URLSearchParams(location.search);
+    let kod = p.get('kod') || '';
+    let adres = p.get('adres') || '';
+    if (location.protocol === 'bezramka:' && location.hostname !== 'blad') {
+      kod = '404';
+      adres = location.href;
+    }
+
+    const KODY = {
+      '-105': ['Nie ma takiego adresu', 'Serwer o tej nazwie nie istnieje. Sprawdź, czy w adresie nie ma literówki.'],
+      '-137': ['Nie ma takiego adresu', 'Serwer o tej nazwie nie istnieje. Sprawdź, czy w adresie nie ma literówki.'],
+      '-106': ['Brak połączenia z internetem', 'Komputer nie jest połączony z siecią. Połącz się i spróbuj ponownie.'],
+      '-102': ['Serwer odrzucił połączenie', 'Pod tym adresem nic nie odpowiada. Może serwer jest wyłączony albo port jest inny.'],
+      '-118': ['Serwer nie odpowiedział', 'Czekaliśmy za długo na odpowiedź. Spróbuj ponownie za chwilę.'],
+      '-109': ['Nie da się dojechać', 'Ten adres jest nieosiągalny z tego komputera.'],
+      '-6': ['Nie ma takiego pliku', 'Pod tą ścieżką nie ma pliku. Sprawdź nazwę pliku i folder.'],
+      '-300': ['Nieprawidłowy adres', 'Tego adresu nie da się otworzyć. Sprawdź, czy jest poprawnie wpisany.'],
+      '404': ['Nie ma takiej strony', 'Bezramka nie ma wbudowanej strony pod tym adresem. Wbudowane są: bezramka://stacja, bezramka://pudel, bezramka://slonce i bezramka://szablon.'],
+    };
+    const n = Number(kod);
+    let [tytul, opis] = KODY[kod] ||
+      (n <= -200 && n > -300
+        ? ['Niebezpieczne połączenie', 'Certyfikat tej strony jest nieprawidłowy, więc Bezramka jej nie otworzy.']
+        : ['Nie udało się otworzyć strony', p.get('opis') ? `Powód: ${p.get('opis')}.` : 'Sprawdź adres i spróbuj jeszcze raz.']);
+
+    document.getElementById('tytul').textContent = tytul;
+    document.getElementById('opis').textContent = opis;
+    document.title = tytul;
+    if (adres) {
+      document.getElementById('adres-tekst').textContent = adres;
+      document.getElementById('adres').hidden = false;
+      if (/^(https?|file):/i.test(adres)) {
+        const ponownie = document.getElementById('ponownie');
+        ponownie.href = adres;
+        ponownie.hidden = false;
+      }
+    }
+
+    const scena = document.getElementById('scena');
+    function dopasuj() {
+      const s = Math.min(innerWidth / 640, innerHeight / 440) || 1;
+      scena.style.transform = `translate(${(innerWidth - 640 * s) / 2}px, ${(innerHeight - 440 * s) / 2}px) scale(${s})`;
+    }
+    addEventListener('resize', dopasuj);
+    dopasuj();
+  })();
+</script>
+</body>
+</html>

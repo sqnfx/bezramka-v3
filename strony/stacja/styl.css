@@ -1,0 +1,292 @@
+/* Stacja Ciuchciowo – strona w kształcie lokomotywy.
+   Zasada: tło strony jest przezroczyste. W Bezramce widać tylko to, co narysowane. */
+
+:root {
+  --zielen-ciemna: #12302A;
+  --mosiadz: #C9A24A;
+  --mosiadz-jasny: #EBCB7A;
+  --mosiadz-ciemny: #7E5E1E;
+  --granat: #0D3B82;
+  --bilet: #D3E6C6;
+  --tusz: #1C2A22;
+  --stempel: #5B3E8E;
+  --podpis-tlo: #13241D;
+  --podpis-tekst: #F4EBD0;
+  --pismo: "Segoe UI", "Helvetica Neue", "Noto Sans", "DejaVu Sans", Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: transparent;
+}
+
+body {
+  font-family: var(--pismo);
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Poza Bezramką pokazujemy niebo, żeby było widać, co się dzieje. */
+html:not(.w-bezramce) body {
+  background: linear-gradient(#BCD3DE 0%, #E3ECEC 62%, #C9CDB8 100%);
+}
+
+#poza {
+  position: fixed;
+  left: 0; right: 0; bottom: 14px;
+  margin: 0;
+  padding: 0 16px;
+  text-align: center;
+  font-size: 14px;
+  color: #35443F;
+}
+.w-bezramce #poza { display: none; }
+
+/* ---------- scena 1200 × 680, skalowana skryptem ---------- */
+#scena {
+  position: absolute;
+  left: 0; top: 0;
+  width: 1200px;
+  height: 680px;
+  transform-origin: 0 0;
+}
+#scena > * { position: absolute; }
+
+#dym, #lokomotywa {
+  left: 0; top: 0;
+  width: 1200px;
+  height: 680px;
+}
+#dym { pointer-events: none; }
+
+/* Puste miejsca rysunku nie łapią myszy – tylko narysowane kształty. */
+#lokomotywa { pointer-events: none; overflow: visible; }
+#lokomotywa * { pointer-events: visiblePainted; }
+#lokomotywa .ozdoba, #lokomotywa .ozdoba * { pointer-events: none; }
+.w-bezramce #lokomotywa *, .w-bezramce #tablica { cursor: grab; }
+.w-bezramce #lokomotywa *:active, .w-bezramce #tablica:active { cursor: grabbing; }
+
+.naglowek { font: 600 14px var(--pismo); fill: #FFFFFF; }
+.naglowek.drobny { font-weight: 500; fill: #C9DAF8; }
+.nazwa {
+  font: 700 23px Georgia, "Times New Roman", "DejaVu Serif", serif;
+  letter-spacing: .05em;
+  text-anchor: middle;
+  fill: #3A2A08;
+}
+.nazwa-blask { fill: #F8E7B0; }
+
+/* lizak: czerwony na postoju, zielony przy odjeździe */
+#lizak-tarcza { fill: #C8281F; transition: fill .2s; }
+.jazda #lizak-tarcza { fill: #1E8A4A; }
+
+/* reflektory */
+.soczewka { fill: #D9D2B0; transition: fill .25s; }
+.snopy, .blask { opacity: 0; transition: opacity .35s; }
+.swiatlo .soczewka { fill: #FFF6C8; }
+.swiatlo .snopy { opacity: 1; }
+.swiatlo .blask { opacity: .9; }
+
+/* maszynista: przechyla głowę, gdy na niego najedziesz; szczeka przed przemianą */
+#pies-glowa { transform-origin: 195px 292px; transition: transform .25s ease; }
+.pies-patrzy #pies-glowa { transform: rotate(-9deg); }
+.pyszczek-otwarty { display: none; }
+.szczeka .pyszczek-otwarty { display: inline; }
+.szczeka .pyszczek-zamkniety { display: none; }
+.szczeka #pies-glowa { transform: rotate(-9deg) translateY(-3px); transition-duration: .08s; }
+
+/* gwizdek i megafon */
+#dzwignia-gwizdka { transform-origin: 374px 202px; transition: transform .12s; }
+.gwizdze #dzwignia-gwizdka { transform: rotate(-24deg); }
+.fale { opacity: 0; }
+.mowi .fale path { animation: fala 1.2s ease-out infinite; }
+.mowi .fale { opacity: 1; }
+.mowi .fale path:nth-child(2) { animation-delay: .2s; }
+.mowi .fale path:nth-child(3) { animation-delay: .4s; }
+@keyframes fala {
+  0% { opacity: 0; }
+  30% { opacity: .9; }
+  100% { opacity: 0; }
+}
+
+/* ---------- tablica odjazdów ---------- */
+#tablica {
+  left: 381px; top: 264px;
+  width: 520px; height: 110px;
+  border-radius: 2px;
+}
+
+/* ---------- przyciski nałożone na części lokomotywy ---------- */
+.przycisk {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 16px;
+  background: transparent;
+  cursor: pointer;
+}
+.przycisk:focus-visible {
+  outline: 3px solid var(--mosiadz-jasny);
+  outline-offset: 2px;
+}
+.przycisk::after {
+  content: attr(data-podpis);
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 6px);
+  transform: translate(-50%, 4px);
+  padding: 4px 9px;
+  border-radius: 6px;
+  background: var(--podpis-tlo);
+  color: var(--podpis-tekst);
+  font: 500 13px var(--pismo);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .15s, transform .15s;
+}
+.przycisk:hover::after,
+.przycisk:focus-visible::after,
+.pokaz-podpisy .przycisk::after {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+#przycisk-maszynista { left: 100px; top: 198px; width: 190px; height: 146px; border-radius: 12px; }
+#przycisk-lizak     { left: 8px;    top: 180px; width: 62px; height: 160px; }
+#przycisk-gwizdek   { left: 346px;  top: 150px; width: 54px; height: 68px; }
+/* podpis gwizdka z lewej, żeby nie wchodził na podpis megafonu */
+#przycisk-gwizdek::after { left: auto; right: calc(100% + 4px); bottom: auto; top: 6px; transform: translate(4px, 0); }
+#przycisk-gwizdek:hover::after,
+#przycisk-gwizdek:focus-visible::after,
+.pokaz-podpisy #przycisk-gwizdek::after { transform: none; }
+#przycisk-megafon   { left: 404px;  top: 152px; width: 74px; height: 64px; }
+#przycisk-reflektor { left: 1024px; top: 214px; width: 66px; height: 64px; }
+
+/* ---------- kasa biletowa w ścianie kabiny ---------- */
+#kasa {
+  left: 78px; top: 350px;
+  width: 234px; height: 80px;
+  margin: 0;
+  padding: 9px 10px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: var(--zielen-ciemna);
+  border: 3px solid var(--mosiadz);
+  border-radius: 60px 60px 8px 8px / 26px 26px 8px 8px;
+  box-shadow: inset 0 3px 8px rgba(0, 0, 0, .5);
+}
+#kasa label {
+  font: 500 12px var(--pismo);
+  color: #E9DDB8;
+}
+.kasa-rzad { display: flex; gap: 6px; width: 100%; }
+#kasa select,
+#kasa button {
+  height: 30px;
+  font: 500 12.5px var(--pismo);
+  border-radius: 6px;
+}
+#kasa select {
+  flex: 1;
+  min-width: 0;
+  padding: 0 20px 0 7px;
+  text-overflow: ellipsis;
+  border: 1px solid #08170F;
+  color: var(--tusz);
+  background: #F1EEE3 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%231C2A22' stroke-width='1.6'/%3E%3C/svg%3E") no-repeat right 7px center;
+  appearance: none;
+  cursor: pointer;
+}
+#kasa button {
+  padding: 0 9px;
+  border: 1px solid var(--mosiadz-ciemny);
+  background: linear-gradient(#F1D68C, var(--mosiadz));
+  color: #2E2207;
+  font-weight: 650;
+  cursor: pointer;
+}
+#kasa button:active { background: linear-gradient(var(--mosiadz), #E2C273); }
+#kasa select:focus-visible,
+#kasa button:focus-visible {
+  outline: 3px solid var(--mosiadz-jasny);
+  outline-offset: 1px;
+}
+
+/* ---------- bilet kartonikowy ---------- */
+#bilet {
+  left: 98px; top: 28px;
+  width: 194px; height: 118px;
+  padding: 8px 11px 7px;
+  border-radius: 5px;
+  background: var(--bilet);
+  color: var(--tusz);
+  font: 500 11px/1.35 var(--pismo);
+  visibility: hidden;
+  transform: translateY(138px);
+  transition: transform .95s cubic-bezier(.2, .7, .25, 1);
+  cursor: pointer;
+}
+#bilet.widoczny { visibility: visible; }
+#bilet.wydruk { transform: translateY(0) rotate(-3deg); }
+#bilet.skasowany {
+  -webkit-mask: radial-gradient(circle 6px at 172px 30px, transparent 97%, #000 100%);
+  mask: radial-gradient(circle 6px at 172px 30px, transparent 97%, #000 100%);
+}
+#bilet.odlot {
+  transform: translate(-70px, -170px) rotate(-26deg);
+  opacity: 0;
+  transition: transform .7s ease-in, opacity .7s ease-in;
+}
+#bilet:focus-visible { outline: 3px solid var(--mosiadz-jasny); outline-offset: 2px; }
+
+.b-gora, .b-szczegoly { display: flex; justify-content: space-between; gap: 8px; }
+.b-gora { font-size: 10px; opacity: .8; }
+.b-skad { margin-top: 4px; }
+.b-cel {
+  font-size: 15px;
+  font-weight: 750;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.b-szczegoly { margin-top: 2px; }
+.b-szczegoly b { font-weight: 700; }
+.b-nr { font-variant-numeric: tabular-nums; opacity: .85; }
+.b-rada { margin-top: 2px; font-size: 10px; opacity: .72; }
+.b-stempel {
+  position: absolute;
+  right: 8px; bottom: 23px;
+  padding: 2px 6px;
+  border: 2px solid var(--stempel);
+  border-radius: 4px;
+  color: var(--stempel);
+  font: 700 10.5px var(--pismo);
+  font-variant-numeric: tabular-nums;
+  opacity: 0;
+  transform: rotate(-6deg) scale(1.6);
+  transition: opacity .12s, transform .12s;
+}
+.skasowany .b-stempel { opacity: .88; transform: rotate(-6deg) scale(1); }
+
+.tylko-czytnik {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #bilet, #bilet.odlot, .przycisk::after { transition-duration: .01s; }
+  .mowi .fale path { animation: none; }
+  #pies-glowa { transition: none; }
+}

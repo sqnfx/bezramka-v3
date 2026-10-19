@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Bezramka ustawi okno na ten rozmiar. Wszystko, co przezroczyste, zniknie z ekranu.
+     Atrybut data-bezramka-uchwyt (niżej, na #scena) pozwala przesuwać okno, chwytając lokomotywę. -->
+<meta name="bezramka-rozmiar" content="1200x680">
+<title>Stacja Ciuchciowo</title>
+<link rel="stylesheet" href="styl.css">
+</head>
+<body>
+<main id="scena" class="pokaz-podpisy" data-bezramka-uchwyt aria-label="Stacja Ciuchciowo: lokomotywa z maszynistą, tablicą odjazdów, zegarem i kasą biletową">
+
+  <canvas id="dym" aria-hidden="true"></canvas>
+
+  <!-- Bilet drukuje się z kasy i wysuwa szczeliną w dachu kabiny (leży pod rysunkiem, więc chowa się za dachem). -->
+  <div id="bilet" role="button" tabindex="-1" aria-label="Bilet">
+    <div class="b-gora"><span>Kolej Ciuchciowo</span><span>klasa 2</span></div>
+    <div class="b-skad">Ciuchciowo –</div>
+    <div class="b-cel" id="b-cel">Zakopane</div>
+    <div class="b-szczegoly"><span>Odjazd <span id="b-czas">13:05</span>, tor <span id="b-tor">2</span></span><b id="b-cena">4,87 zł</b></div>
+    <div class="b-nr" id="b-nr">Nr 004201</div>
+    <div class="b-rada" id="b-rada">Kliknij bilet, żeby go skasować</div>
+    <div class="b-stempel" id="b-stempel" aria-hidden="true"></div>
+  </div>
+
+  <svg id="lokomotywa" viewBox="0 0 1200 680" aria-hidden="true">
+    <defs>
+      <linearGradient id="g-kociol" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#3B7A61"/>
+        <stop offset=".16" stop-color="#2C6550"/>
+        <stop offset=".55" stop-color="#1E4B3B"/>
+        <stop offset="1" stop-color="#0F2A21"/>
+      </linearGradient>
+      <linearGradient id="g-kabina" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#28604C"/>
+        <stop offset="1" stop-color="#173B2F"/>
+      </linearGradient>
+      <linearGradient id="g-dach" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#4A4F57"/>
+        <stop offset="1" stop-color="#202327"/>
+      </linearGradient>
+      <linearGradient id="g-dymnica" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#4C5159"/>
+        <stop offset=".3" stop-color="#2E3237"/>
+        <stop offset="1" stop-color="#17191C"/>
+      </linearGradient>
+      <linearGradient id="g-komin" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#1A1C1F"/>
+        <stop offset=".35" stop-color="#4C5159"/>
+        <stop offset="1" stop-color="#1E2124"/>
+      </linearGradient>
+      <linearGradient id="g-mosiadz" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#F3DA95"/>
+        <stop offset=".45" stop-color="#C9A24A"/>
+        <stop offset="1" stop-color="#7E5E1E"/>
+      </linearGradient>
+      <linearGradient id="g-mosiadz-poz" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#7E5E1E"/>
+        <stop offset=".32" stop-color="#F0D48A"/>
+        <stop offset=".6" stop-color="#C9A24A"/>
+        <stop offset="1" stop-color="#6E5119"/>
+      </linearGradient>
+      <linearGradient id="g-szyba" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#D9E6EB"/>
+        <stop offset="1" stop-color="#93AFBB"/>
+      </linearGradient>
+      <linearGradient id="g-szyna" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#D3D7DC"/>
+        <stop offset=".35" stop-color="#8A9097"/>
+        <stop offset="1" stop-color="#4A4F55"/>
+      </linearGradient>
+      <linearGradient id="g-cylinder" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#357058"/>
+        <stop offset=".5" stop-color="#1E4B3B"/>
+        <stop offset="1" stop-color="#11301F"/>
+      </linearGradient>
+      <linearGradient id="g-snop" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#FFF2BE" stop-opacity=".62"/>
+        <stop offset=".55" stop-color="#FFF2BE" stop-opacity=".2"/>
+        <stop offset="1" stop-color="#FFF2BE" stop-opacity="0"/>
+      </linearGradient>
+      <linearGradient id="g-wnetrze" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#4A6C64"/>
+        <stop offset="1" stop-color="#22362F"/>
+      </linearGradient>
+      <linearGradient id="g-futro" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#C98F58"/>
+        <stop offset="1" stop-color="#A9713F"/>
+      </linearGradient>
+      <clipPath id="okno-kabiny">
+        <rect x="103" y="201" width="184" height="132" rx="9"/>
+      </clipPath>
+      <filter id="f-blask" x="-1" y="-1" width="3" height="3">
+        <feGaussianBlur stdDeviation="5"/>
+      </filter>
+    </defs>
+
+    <!-- tor: podkłady przesuwają się, gdy lokomotywa jedzie -->
+    <g id="tor">
+      <g id="podklady"></g>
+      <rect x="0" y="626" width="1200" height="12" fill="url(#g-szyna)"/>
+      <rect x="0" y="626" width="1200" height="2" fill="#EEF0F2" opacity=".75"/>
+    </g>
+
+    <!-- snopy światła reflektorów (przezroczyste, więc klik przez nie przechodzi) -->
+    <g class="ozdoba snopy">
+      <polygon points="1090,236 1200,174 1200,324 1090,262" fill="url(#g-snop)"/>
+      <polygon points="1104,414 1200,390 1200,456 1104,432" fill="url(#g-snop)"/>
+    </g>
+
+    <!-- rama pod kotłem, widoczna między szprychami -->
+    <rect x="120" y="462" width="900" height="32" fill="#25282C"/>
+
+    <!-- zderzaki -->
+    <rect x="24" y="455" width="20" height="16" fill="#6B7178"/>
+    <ellipse cx="24" cy="463" rx="6" ry="21" fill="#3E4349"/>
+    <rect x="40" y="436" width="26" height="54" fill="#B3261E"/>
+    <rect x="1060" y="436" width="40" height="54" fill="#B3261E"/>
+    <rect x="1100" y="455" width="22" height="16" fill="#6B7178"/>
+    <ellipse cx="1124" cy="463" rx="7" ry="22" fill="#3E4349"/>
+    <ellipse cx="1126" cy="457" rx="2.5" ry="9" fill="#80878F" opacity=".7"/>
+
+    <!-- „lizak” dyżurnego ruchu w uchwycie na tylnej ścianie kabiny -->
+    <g id="lizak">
+      <rect x="36" y="294" width="28" height="8" rx="2" fill="#202327"/>
+      <rect x="36" y="318" width="28" height="8" rx="2" fill="#202327"/>
+      <rect x="35" y="214" width="7" height="124" rx="3.5" fill="#ECE8DD"/>
+      <circle id="lizak-tarcza" cx="38.5" cy="208" r="25" stroke="#F7F5EF" stroke-width="5"/>
+    </g>
+
+    <!-- kabina -->
+    <rect x="60" y="178" width="270" height="264" fill="url(#g-kabina)"/>
+    <rect x="70" y="190" width="250" height="242" rx="8" fill="none" stroke="#C9A24A" stroke-opacity=".55" stroke-width="2"/>
+    <path d="M40 172 C 84 132 306 132 350 172 L 350 181 L 40 181 Z" fill="url(#g-dach)"/>
+    <rect x="108" y="151" width="174" height="5" rx="2.5" fill="#0C0D0F"/>
+    <!-- okno kabiny: maszynista Burek -->
+    <g id="maszynista">
+      <g clip-path="url(#okno-kabiny)">
+        <rect x="100" y="198" width="190" height="138" fill="url(#g-wnetrze)"/>
+        <!-- manometr na tylnej ścianie kabiny -->
+        <circle cx="128" cy="228" r="13" fill="#E9E4D6" stroke="#C9A24A" stroke-width="3"/>
+        <path d="M128 228 L136 222" stroke="#B3261E" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="262" cy="224" r="5" fill="#C9A24A"/>
+        <rect x="259" y="226" width="6" height="30" rx="3" fill="#7E5E1E"/>
+        <g id="pies">
+          <!-- mundur i chustka -->
+          <path d="M116 336 C 120 302, 150 290, 195 290 C 240 290, 270 302, 274 336 Z" fill="#23345C"/>
+          <path d="M176 292 L195 318 L214 292" fill="none" stroke="#3A4F80" stroke-width="3"/>
+          <path d="M166 290 L224 290 L195 320 Z" fill="#C8372D"/>
+          <circle cx="195" cy="294" r="6" fill="#A62B23"/>
+          <circle cx="152" cy="318" r="3" fill="#C9A24A"/>
+          <circle cx="238" cy="318" r="3" fill="#C9A24A"/>
+          <g id="pies-glowa">
+            <ellipse cx="195" cy="258" rx="44" ry="40" fill="url(#g-futro)"/>
+            <path d="M188 232 C 190 226, 200 226, 202 232 L 208 262 L 182 262 Z" fill="#F2DDBF"/>
+            <ellipse cx="195" cy="278" rx="28" ry="19" fill="#F2DDBF"/>
+            <!-- uszy -->
+            <path d="M162 234 C 142 234, 132 262, 138 290 C 142 301, 157 299, 161 287 C 165 271, 170 250, 168 239 Z" fill="#7A4B2A"/>
+            <path d="M228 234 C 248 234, 258 262, 252 290 C 248 301, 233 299, 229 287 C 225 271, 220 250, 222 239 Z" fill="#7A4B2A"/>
+            <!-- oczy -->
+            <ellipse cx="178" cy="255" rx="5.5" ry="6.5" fill="#2A1C14"/>
+            <ellipse cx="212" cy="255" rx="5.5" ry="6.5" fill="#2A1C14"/>
+            <circle cx="180" cy="252.5" r="1.9" fill="#FFFFFF"/>
+            <circle cx="214" cy="252.5" r="1.9" fill="#FFFFFF"/>
+            <!-- nos i pyszczek -->
+            <ellipse cx="195" cy="270" rx="9" ry="6.5" fill="#2A1C14"/>
+            <ellipse cx="192" cy="268" rx="3" ry="1.6" fill="#6E5A50"/>
+            <g class="pyszczek-zamkniety" fill="none" stroke="#5A3A26" stroke-width="2" stroke-linecap="round">
+              <path d="M195 276 L195 282"/>
+              <path d="M195 282 C 189 289, 181 288, 178 283"/>
+              <path d="M195 282 C 201 289, 209 288, 212 283"/>
+            </g>
+            <g class="pyszczek-otwarty">
+              <path d="M180 281 C 184 297, 206 297, 210 281 C 203 285, 187 285, 180 281 Z" fill="#4A2418"/>
+              <ellipse cx="195" cy="291" rx="7" ry="5" fill="#E86F7E"/>
+            </g>
+            <!-- czapka maszynisty ze skrzydlatym kołem -->
+            <g id="czapka" transform="translate(0 -7)">
+              <path d="M146 238 L150 215 C 162 202, 228 202, 240 215 L244 238 Z" fill="#1E2D50"/>
+              <rect x="148" y="227" width="94" height="11" fill="#16223D"/>
+              <rect x="148" y="226" width="94" height="2" fill="#C8372D"/>
+              <path d="M146 238 C 165 248, 225 248, 244 238 L 247 242 C 226 256, 164 256, 143 242 Z" fill="#101318"/>
+              <g transform="translate(195 217)">
+                <path d="M-5 -1 C -11 -6, -17 -5, -21 -2 C -16 -2, -12 0, -6 2 Z" fill="#E7C66E"/>
+                <path d="M5 -1 C 11 -6, 17 -5, 21 -2 C 16 -2, 12 0, 6 2 Z" fill="#E7C66E"/>
+                <circle r="5" fill="none" stroke="#E7C66E" stroke-width="2"/>
+                <circle r="1.4" fill="#E7C66E"/>
+              </g>
+            </g>
+          </g>
+        </g>
+        <!-- odblask szyby -->
+        <polygon class="ozdoba" points="232,201 258,201 168,333 142,333" fill="#FFFFFF" opacity=".1"/>
+      </g>
+      <rect x="100" y="198" width="190" height="138" rx="12" fill="none" stroke="url(#g-mosiadz)" stroke-width="6"/>
+      <!-- łapy na parapecie -->
+      <g fill="#F2DDBF" stroke="#C9A77F" stroke-width="1.2">
+        <ellipse cx="163" cy="335" rx="16" ry="9"/>
+        <ellipse cx="227" cy="335" rx="16" ry="9"/>
+      </g>
+      <g stroke="#B08A60" stroke-width="1.4" stroke-linecap="round">
+        <path d="M157 333 L157 340 M163 332 L163 341 M169 333 L169 340"/>
+        <path d="M221 333 L221 340 M227 332 L227 341 M233 333 L233 340"/>
+      </g>
+    </g>
+
+    <!-- kocioł -->
+    <rect x="330" y="214" width="618" height="228" fill="url(#g-kociol)"/>
+    <rect x="344" y="214" width="9" height="228" fill="url(#g-mosiadz)"/>
+    <rect x="928" y="214" width="9" height="228" fill="url(#g-mosiadz)"/>
+
+    <!-- piasecznica i kopuła parowa -->
+    <path d="M498 216 C498 194 512 184 535 184 C558 184 572 194 572 216 Z" fill="#245A47"/>
+    <ellipse cx="535" cy="186" rx="15" ry="5" fill="url(#g-mosiadz-poz)"/>
+    <path d="M688 216 C688 182 712 164 740 164 C768 164 792 182 792 216 Z" fill="url(#g-mosiadz-poz)"/>
+    <rect x="682" y="209" width="116" height="7" rx="2" fill="#8C6B25"/>
+
+    <!-- gwizdek -->
+    <g id="gwizdek">
+      <rect x="366" y="196" width="8" height="19" fill="#8C6B25"/>
+      <rect x="361" y="168" width="18" height="30" rx="4" fill="url(#g-mosiadz-poz)"/>
+      <rect x="359" y="163" width="22" height="7" rx="3" fill="#B08A35"/>
+      <path id="dzwignia-gwizdka" d="M374 202 L394 194" stroke="#8C6B25" stroke-width="3.5" stroke-linecap="round"/>
+    </g>
+
+    <!-- dworcowy megafon -->
+    <g id="megafon">
+      <rect x="448" y="188" width="5" height="27" fill="#34383E"/>
+      <rect x="452" y="177" width="18" height="22" rx="4" fill="#8A9098"/>
+      <path d="M456 179 L420 162 L420 214 L456 197 Z" fill="#AEB4BB"/>
+      <ellipse cx="420" cy="188" rx="6" ry="26" fill="#2F3338"/>
+      <g class="ozdoba fale" fill="none" stroke="#F4F6F8" stroke-width="3" stroke-linecap="round">
+        <path d="M405 172 Q396 188 405 204"/>
+        <path d="M393 162 Q380 188 393 214"/>
+        <path d="M381 152 Q364 188 381 224"/>
+      </g>
+    </g>
+
+    <!-- dymnica i komin -->
+    <rect x="946" y="220" width="92" height="222" fill="url(#g-dymnica)"/>
+    <path d="M1038 220 C1061 250 1061 412 1038 442 Z" fill="#1E2125"/>
+    <g id="nity"></g>
+    <path d="M958 222 L962 142 L954 124 L1026 124 L1018 142 L1022 222 Z" fill="url(#g-komin)"/>
+    <rect x="946" y="110" width="88" height="17" rx="4" fill="#3B3F46"/>
+    <!-- zegar dworcowy na dymnicy -->
+    <g id="zegar" transform="translate(992 336) scale(.7)"></g>
+
+    <!-- tablica odjazdów (diody rysuje skrypt na płótnie nałożonym na ten panel) -->
+    <rect x="366" y="232" width="550" height="152" rx="7" fill="#0D3B82" stroke="#072556" stroke-width="2"/>
+    <text x="384" y="253" class="naglowek">Odjazdy</text>
+    <text x="898" y="253" class="naglowek drobny" text-anchor="end">Peron 1</text>
+    <rect x="376" y="261" width="530" height="116" rx="3" fill="#17130E"/>
+
+    <!-- tabliczka z nazwą stacji -->
+    <rect x="540" y="394" width="220" height="38" rx="4" fill="url(#g-mosiadz)" stroke="#7E5E1E" stroke-width="2"/>
+    <text x="650" y="422" class="nazwa nazwa-blask">Ciuchciowo</text>
+    <text x="650" y="421" class="nazwa">Ciuchciowo</text>
+
+    <!-- pomost -->
+    <rect x="44" y="440" width="1030" height="24" fill="#B3261E"/>
+    <rect x="44" y="440" width="1030" height="3" fill="#D6493D"/>
+    <rect x="44" y="461" width="1030" height="3" fill="#7A1A14"/>
+
+    <!-- cylinder i prowadnice -->
+    <rect x="790" y="489" width="112" height="5" fill="#9AA1A9"/>
+    <rect x="790" y="519" width="112" height="5" fill="#9AA1A9"/>
+    <rect x="900" y="476" width="112" height="62" rx="9" fill="url(#g-cylinder)"/>
+    <rect x="906" y="476" width="6" height="62" fill="url(#g-mosiadz)"/>
+    <rect x="998" y="476" width="6" height="62" fill="url(#g-mosiadz)"/>
+    <ellipse cx="1012" cy="507" rx="5" ry="28" fill="#143627"/>
+
+    <!-- koła (skrypt) -->
+    <g id="kola"></g>
+
+    <!-- mechanizm korbowy -->
+    <rect id="drag-sprzegajacy" x="410" y="539" width="380" height="14" rx="7" fill="#A4ABB3" stroke="#5B6168" stroke-width="1.5"/>
+    <line id="tloczysko" x1="880" y1="506" x2="902" y2="506" stroke="#C9CED3" stroke-width="6"/>
+    <rect id="wodzik" x="840" y="495" width="34" height="22" rx="3" fill="#7D848C"/>
+    <line id="korbowod" x1="630" y1="546" x2="857" y2="506" stroke="#A4ABB3" stroke-width="13" stroke-linecap="round"/>
+
+    <!-- reflektory -->
+    <g id="lampy">
+      <circle class="ozdoba blask" cx="1082" cy="249" r="18" fill="#FFE58A" filter="url(#f-blask)"/>
+      <circle class="ozdoba blask" cx="1100" cy="422" r="12" fill="#FFE58A" filter="url(#f-blask)"/>
+      <rect x="1028" y="268" width="18" height="7" rx="2" fill="#202327"/>
+      <rect x="1040" y="221" width="30" height="10" rx="3" fill="#202327"/>
+      <rect x="1032" y="228" width="46" height="42" rx="7" fill="#2B2E33"/>
+      <path class="soczewka" d="M1078 232 A 17 17 0 0 1 1078 266 Z"/>
+      <rect x="1066" y="408" width="32" height="28" rx="5" fill="#2B2E33"/>
+      <path class="soczewka" d="M1098 411 A 11 11 0 0 1 1098 433 Z"/>
+    </g>
+  </svg>
+
+  <canvas id="tablica" role="img" aria-label="Tablica odjazdów"></canvas>
+
+  <button class="przycisk" id="przycisk-maszynista" type="button" data-podpis="Szukaj psa" aria-label="Maszynista Burek: zamień ciuchcię w wyszukiwarkę zaginionych psów"></button>
+  <button class="przycisk" id="przycisk-lizak" type="button" data-podpis="Odjazd" aria-pressed="false" aria-label="Odjazd: pokaż lizak i rusz lokomotywę"></button>
+  <button class="przycisk" id="przycisk-gwizdek" type="button" data-podpis="Gwizdek" aria-label="Gwizdek"></button>
+  <button class="przycisk" id="przycisk-megafon" type="button" data-podpis="Zapowiedź" aria-label="Zapowiedź najbliższego pociągu"></button>
+  <button class="przycisk" id="przycisk-reflektor" type="button" data-podpis="Reflektory" aria-pressed="false" aria-label="Reflektory"></button>
+
+  <form id="kasa" aria-label="Kasa biletowa">
+    <label for="kasa-kurs">Kasa biletowa</label>
+    <div class="kasa-rzad">
+      <select id="kasa-kurs"></select>
+      <button type="submit">Kup bilet</button>
+    </div>
+  </form>
+
+  <ul id="odjazdy-lista" class="tylko-czytnik" aria-label="Najbliższe odjazdy"></ul>
+</main>
+
+<p id="poza">Ta strona ma przezroczyste tło. Otwórz ją w Bezramce, a z okna zostanie sama lokomotywa.</p>
+
+<script src="stacja.js"></script>
+</body>
+</html>

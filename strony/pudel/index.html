@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Ten sam rozmiar co Stacja Ciuchciowo, więc przy przemianie okno się nie zmienia. -->
+<meta name="bezramka-rozmiar" content="1200x680">
+<title>Pudel szuka psa</title>
+<link rel="stylesheet" href="pudel.css">
+</head>
+<body>
+<main id="scena" data-bezramka-uchwyt aria-label="Pudel z wyszukiwarką zaginionych i znalezionych psów">
+
+  <svg id="pudel" viewBox="0 0 1200 680" aria-hidden="true">
+    <defs>
+      <linearGradient id="g-skora" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#EDBD8E"/>
+        <stop offset="1" stop-color="#DDA675"/>
+      </linearGradient>
+      <linearGradient id="g-skora-dalej" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#D9A473"/>
+        <stop offset="1" stop-color="#C58D5D"/>
+      </linearGradient>
+    </defs>
+
+    <!-- ogon (macha, gdy pudel coś wywęszy) -->
+    <g id="ogon">
+      <path d="M990 236 C 1020 214, 1046 176, 1072 128" fill="none" stroke="url(#g-skora)" stroke-width="17" stroke-linecap="round"/>
+      <g id="futro-ogon"></g>
+    </g>
+
+    <!-- nogi dalsze -->
+    <g id="nogi-dalsze"></g>
+
+    <!-- tułów, pierś i nogi bliższe -->
+    <g id="futro-tulow"></g>
+    <g id="futro-piers"></g>
+    <g id="nogi-blizsze"></g>
+
+    <!-- „puszysty” brzeg panelu z wyszukiwarką -->
+    <g id="panel-brzeg"></g>
+
+    <!-- głowa -->
+    <g id="glowa">
+      <g id="futro-czubek"></g>
+      <ellipse cx="182" cy="172" rx="56" ry="48" fill="url(#g-skora)"/>
+      <g id="pyszczek">
+        <path d="M156 146 C 116 148, 80 158, 62 178 C 50 192, 56 210, 78 214 C 106 220, 144 217, 172 206 Z" fill="url(#g-skora)"/>
+        <ellipse cx="59" cy="184" rx="14" ry="12" fill="#2B1D18"/>
+        <ellipse cx="54" cy="179" rx="4.5" ry="2.6" fill="#7A6A62"/>
+        <path d="M72 210 C 92 216, 116 215, 134 207" fill="none" stroke="#A86E46" stroke-width="2.6" stroke-linecap="round"/>
+      </g>
+      <ellipse cx="136" cy="196" rx="13" ry="7" fill="#F08F8F" opacity=".35"/>
+      <ellipse cx="150" cy="160" rx="8.5" ry="10" fill="#2B1D18"/>
+      <circle cx="153" cy="156" r="2.8" fill="#FFFFFF"/>
+      <path d="M140 151 C 142 146, 146 144, 150 145" fill="none" stroke="#2B1D18" stroke-width="2" stroke-linecap="round"/>
+      <!-- obroża z medalikiem -->
+      <path d="M150 232 C 178 246, 214 252, 252 246" fill="none" stroke="#C8372D" stroke-width="12" stroke-linecap="round"/>
+      <circle cx="186" cy="250" r="4" fill="none" stroke="#B8923E" stroke-width="2"/>
+      <circle cx="186" cy="266" r="12" fill="#E7C66E" stroke="#B8923E" stroke-width="2"/>
+      <path d="M180 266 a3 3 0 1 1 6 0 a3 3 0 1 1 6 0 l-6 6 z" fill="#B8923E"/>
+      <g id="futro-ucho"></g>
+      <!-- kokardka -->
+      <g id="kokardka" transform="translate(236 50) rotate(-14)">
+        <path d="M0 0 C -14 -22, -38 -18, -34 2 C -32 18, -12 14, 0 0 Z" fill="#E25A93"/>
+        <path d="M0 0 C 14 -22, 38 -18, 34 2 C 32 18, 12 14, 0 0 Z" fill="#E25A93"/>
+        <path d="M-2 2 L -12 26 L -4 22 L 0 30 L 4 6 Z" fill="#C5427A"/>
+        <circle r="7" fill="#C5427A"/>
+      </g>
+    </g>
+  </svg>
+
+  <canvas id="para" aria-hidden="true"></canvas>
+
+  <button class="przycisk" id="przycisk-glowa" type="button" data-podpis="Pogłaszcz" aria-label="Pogłaszcz pudla"></button>
+
+  <section id="panel" data-bezramka-bez-uchwytu aria-labelledby="tytul">
+    <header class="gora">
+      <h1 id="tytul">Szukamy psa</h1>
+      <button type="button" id="wroc" class="przycisk-drugi">Wróć do ciuchci</button>
+    </header>
+
+    <!-- widok: wyszukiwanie -->
+    <div id="widok-szukaj" class="widok">
+      <form id="formularz-szukaj" role="search" autocomplete="off">
+        <input id="pytanie" type="search" spellcheck="false"
+               placeholder="Opisz psa, np. biały pudel, Rozjazdy, kokardka" aria-label="Opis psa">
+        <button type="submit" class="lupa" aria-label="Szukaj" title="Szukaj (Enter)">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M13 13l4.5 4.5"/></svg>
+        </button>
+      </form>
+
+      <div class="filtry">
+        <div class="segmenty" role="radiogroup" aria-label="Rodzaj ogłoszeń" id="filtr-typ">
+          <button type="button" role="radio" aria-checked="true" data-typ="">Wszystkie</button>
+          <button type="button" role="radio" aria-checked="false" data-typ="zaginiony">Zaginione</button>
+          <button type="button" role="radio" aria-checked="false" data-typ="znaleziony">Znalezione</button>
+        </div>
+        <div class="segmenty" role="group" aria-label="Wielkość psa" id="filtr-wielkosc">
+          <button type="button" aria-pressed="false" data-wielkosc="maly">Mały</button>
+          <button type="button" aria-pressed="false" data-wielkosc="sredni">Średni</button>
+          <button type="button" aria-pressed="false" data-wielkosc="duzy">Duży</button>
+        </div>
+        <div class="masci" role="group" aria-label="Maść" id="filtr-masc"></div>
+      </div>
+
+      <ol id="wyniki" aria-label="Ogłoszenia"></ol>
+      <p id="pusto" class="pusto" hidden></p>
+
+      <footer class="dol">
+        <button type="button" id="dodaj" class="przycisk-glowny">Dodaj ogłoszenie</button>
+        <button type="button" id="internet" class="przycisk-drugi" aria-expanded="false" aria-controls="dymek">Szukaj w internecie</button>
+        <p id="ile" class="ile" aria-live="polite"></p>
+      </footer>
+
+      <div id="dymek" class="dymek" hidden>
+        <p class="dymek-tytul">Prawdziwy zaginiony pies</p>
+        <ul>
+          <li><a href="#" data-zewn="google">Szukaj tego opisu w Google</a></li>
+          <li><a href="https://www.safe-animal.eu/pl/_f/Search" data-zewn="">Sprawdź numer chipa w bazie Safe-Animal</a></li>
+          <li><a href="https://www.safe-animal.eu/pl/znalezione-zaginione/Classified" data-zewn="">Ogłoszenia Safe-Animal: zaginione i znalezione</a></li>
+          <li><a href="https://europetnet.org/pet-id-search/" data-zewn="">Europetnet: numer chipa w bazach Europy</a></li>
+        </ul>
+        <p class="dymek-rada">Znalazłeś psa? Weterynarz, schronisko, policja albo straż miejska odczytają jego chip czytnikiem.</p>
+      </div>
+    </div>
+
+    <!-- widok: nowe ogłoszenie -->
+    <form id="widok-dodaj" class="widok" hidden autocomplete="off" novalidate>
+      <div class="pola">
+        <div class="pole pole-typ">
+          <span class="etykieta" id="etykieta-typ">Co się stało?</span>
+          <div class="segmenty" role="radiogroup" aria-labelledby="etykieta-typ" id="nowy-typ">
+            <button type="button" role="radio" aria-checked="true" data-typ="zaginiony">Zaginął mój pies</button>
+            <button type="button" role="radio" aria-checked="false" data-typ="znaleziony">Znalazłem psa</button>
+          </div>
+        </div>
+        <label class="pole">
+          <span class="etykieta">Imię psa</span>
+          <input id="nowy-imie" maxlength="30" placeholder="jeśli znasz">
+        </label>
+        <label class="pole">
+          <span class="etykieta">Rasa</span>
+          <input id="nowy-rasa" list="lista-ras" maxlength="40" placeholder="np. kundel">
+        </label>
+        <label class="pole">
+          <span class="etykieta">Maść</span>
+          <select id="nowy-masc"></select>
+        </label>
+        <label class="pole">
+          <span class="etykieta">Wielkość</span>
+          <select id="nowy-wielkosc">
+            <option value="maly">mały</option>
+            <option value="sredni" selected>średni</option>
+            <option value="duzy">duży</option>
+          </select>
+        </label>
+        <label class="pole">
+          <span class="etykieta">Gdzie</span>
+          <input id="nowy-miejsce" list="lista-miejsc" maxlength="40" placeholder="miejscowość">
+        </label>
+        <label class="pole">
+          <span class="etykieta">Kiedy</span>
+          <input id="nowy-data" type="date">
+        </label>
+        <label class="pole pole-szerokie">
+          <span class="etykieta">Znaki szczególne</span>
+          <input id="nowy-opis" maxlength="160" placeholder="np. czerwona obroża, białe łapy, nr chipa">
+        </label>
+        <label class="pole pole-szerokie">
+          <span class="etykieta">Kontakt</span>
+          <input id="nowy-kontakt" maxlength="80" placeholder="jak się z Tobą skontaktować">
+        </label>
+      </div>
+      <p id="blad" class="blad" role="alert" hidden></p>
+      <footer class="dol">
+        <button type="submit" class="przycisk-glowny">Opublikuj ogłoszenie</button>
+        <button type="button" id="anuluj" class="przycisk-drugi">Anuluj</button>
+        <p class="ile">Ogłoszenie zostaje na tym komputerze.</p>
+      </footer>
+    </form>
+
+    <datalist id="lista-ras"></datalist>
+    <datalist id="lista-miejsc"></datalist>
+  </section>
+
+  <p id="komunikat" class="komunikat" role="status" hidden></p>
+</main>
+
+<p id="poza">Ta strona ma przezroczyste tło. Otwórz ją w Bezramce, a z okna zostanie sam pudel.</p>
+
+<script src="pudel.js"></script>
+</body>
+</html>

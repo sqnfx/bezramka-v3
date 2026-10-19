@@ -1,0 +1,16 @@
+{
+  "name": "bezramka",
+  "productName": "Bezramka",
+  "version": "1.2.0",
+  "description": "Mikroprzeglądarka bez ramki: z okna zostaje tylko kształt strony.",
+  "main": "main.js",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "test": "node testy/adres.test.js"
+  },
+  "devDependencies": {
+    "electron": ">=37.0.0"
+  },
+  "license": "MIT"
+}

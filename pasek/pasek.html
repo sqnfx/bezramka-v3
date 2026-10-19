@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self'; script-src 'self'; img-src 'self' data:">
+<title>Bezramka – pasek adresu</title>
+<link rel="stylesheet" href="pasek.css">
+</head>
+<body>
+<div id="pigulka" class="pigulka">
+  <div class="rzad">
+    <svg class="znak" viewBox="0 0 20 20" aria-hidden="true">
+      <path d="M2 7V2h5M13 2h5v5M18 13v5h-5M7 18H2v-5"/>
+    </svg>
+
+    <button type="button" data-akcja="wstecz" title="Wstecz (Alt+←)" aria-label="Wstecz">
+      <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M12.5 4.5 7 10l5.5 5.5"/></svg>
+    </button>
+    <button type="button" data-akcja="dalej" title="Dalej (Alt+→)" aria-label="Dalej">
+      <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7.5 4.5 13 10l-5.5 5.5"/></svg>
+    </button>
+    <button type="button" data-akcja="odswiez" id="odswiez" title="Odśwież (F5)" aria-label="Odśwież">
+      <svg class="ikona-odswiez" viewBox="0 0 20 20" aria-hidden="true"><path d="M15.5 9.5a5.5 5.5 0 1 1-1.8-4.1M15.5 3.5v3.5H12"/></svg>
+      <svg class="ikona-stop" viewBox="0 0 20 20" aria-hidden="true"><path d="M5.5 5.5l9 9M14.5 5.5l-9 9"/></svg>
+    </button>
+
+    <form id="forma" class="forma" autocomplete="off">
+      <input id="adres" type="text" spellcheck="false" autocomplete="off" autocapitalize="off"
+             aria-label="Adres strony" placeholder="Wpisz adres, np. example.com, pudel albo słońce">
+    </form>
+
+    <button type="button" data-akcja="dom" title="Stacja Ciuchciowo (Alt+Home)" aria-label="Strona startowa">
+      <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3.5 9.5 10 4l6.5 5.5M5.5 8v8h9V8"/></svg>
+    </button>
+    <button type="button" data-akcja="na-wierzchu" id="na-wierzchu" title="Zawsze na wierzchu" aria-label="Zawsze na wierzchu" aria-pressed="false">
+      <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 3.5h6M8 3.5v5L5.5 11h9L12 8.5v-5M10 11v5.5"/></svg>
+    </button>
+    <button type="button" data-akcja="zamknij" class="zamknij" title="Zamknij Bezramkę" aria-label="Zamknij Bezramkę">
+      <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5.5 5.5l9 9M14.5 5.5l-9 9"/></svg>
+    </button>
+  </div>
+  <p id="komunikat" class="komunikat" role="status" hidden></p>
+  <div class="ladowanie" aria-hidden="true"></div>
+</div>
+<script src="pasek.js"></script>
+</body>
+</html>
